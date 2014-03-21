@@ -14,10 +14,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 public class MainActivity extends Activity {
-
-	private LocationManager locManager;
-	private LocationListener locListener;
-
+	
 	private Button btnActualizar;
 	private Button btnDesactivar;
 	private TextView lblLatitud;
@@ -25,13 +22,14 @@ public class MainActivity extends Activity {
 	private TextView lblPrecision;
 	private TextView lblEstado;
 	
-
-
+	private LocationManager locationManager;
+	private LocationListener locationListener;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);
-		
+	super.onCreate(savedInstanceState);
+	setContentView(R.layout.activity_main);
+	
 		btnActualizar = (Button)findViewById(R.id.BtnActualizar);
         btnDesactivar = (Button)findViewById(R.id.BtnDesactivar);
         lblLatitud = (TextView)findViewById(R.id.LblPosLatitud);
@@ -40,66 +38,59 @@ public class MainActivity extends Activity {
         lblEstado = (TextView)findViewById(R.id.LblEstado);
         
         btnActualizar.setOnClickListener(new OnClickListener() {
-        	public void onClick(View v) {
-        		comenzarLocalizacion();
-        	}
-        });
-        
-        btnDesactivar.setOnClickListener(new OnClickListener() {
-        	public void onClick(View v) {
-        		locManager.removeUpdates(locListener);
-        	}
-        });
+			@Override
+			public void onClick(View v) {
+				actualizarPosicion();
+			}
+		});
+		        
+		btnDesactivar.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				locationManager.removeUpdates(locationListener);
+			}
+		});
 	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.main, menu);
-		return true;
-	}
-
-	private void comenzarLocalizacion()
+	
+    private void actualizarPosicion()
     {
-		locManager =(LocationManager)getSystemService(Context.LOCATION_SERVICE);
-			    
 	    
-	    Location loc = locManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+	     locationManager =
+	     (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+	    
+	     Location location =
+	     locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+	    
+	     muestraPosicion(location);
+	    
 
-		mostrarPosicion(loc);
-	    
-	   
-	    locListener = new LocationListener() {
-	    	public void onLocationChanged(Location location) {
-	    		mostrarPosicion(location);
-	    	}
-	    	
-	    	public void onProviderDisabled(String provider){
-	    		lblEstado.setText("Provider OFF");
-	    	}
-	    	
-	    	public void onProviderEnabled(String provider){
-	    		lblEstado.setText("Provider ON ");
-	    	}
-	    	
-	    	public void onStatusChanged(String provider, int status, Bundle extras){
-	    		Log.i("", "Provider Status: " + status);
-	    		lblEstado.setText("Provider Status: " + status);
-	    	}
+	     locationListener = new LocationListener() {
+			public void onLocationChanged(Location location) {
+			muestraPosicion(location);
+			}
+			public void onProviderDisabled(String provider){
+			lblEstado.setText("Provider OFF");
+			}
+			public void onProviderEnabled(String provider){
+			lblEstado.setText("Provider ON");
+			}
+			public void onStatusChanged(String provider, int status, Bundle extras){
+			Log.i("LocAndroid", "Provider Status: " + status);
+			lblEstado.setText("Provider Status: " + status);
+			}
 	     };
 	    
-	     locManager.requestLocationUpdates(
-	     LocationManager.GPS_PROVIDER, 30000, 0, locListener);
-	     
+	     locationManager.requestLocationUpdates(
+	     LocationManager.GPS_PROVIDER, 15000, 0, locationListener);
 	    }
-	
-	 private void mostrarPosicion(Location loc) {
+	     
+	    private void muestraPosicion(Location loc) {
 	     if(loc != null)
 	     {
 		     lblLatitud.setText("Latitud: " + String.valueOf(loc.getLatitude()));
 		     lblLongitud.setText("Longitud: " + String.valueOf(loc.getLongitude()));
 		     lblPrecision.setText("Precision: " + String.valueOf(loc.getAccuracy()));
-		     Log.i("", String.valueOf(loc.getLatitude() + " - " + String.valueOf(loc.getLongitude())));
+		     Log.i("LocAndroid", String.valueOf(loc.getLatitude() + " - " + String.valueOf(loc.getLongitude())));
 	     }
 	     else
 	     {
@@ -109,5 +100,13 @@ public class MainActivity extends Activity {
 	     }
 	    }
 	
-	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.main, menu);
+		return true;
+	}
+
 }
+
+
